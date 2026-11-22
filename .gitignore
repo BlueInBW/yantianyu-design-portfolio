@@ -1,0 +1,5 @@
+.local/
+test-results/
+*.log
+.DS_Store
+node_modules/

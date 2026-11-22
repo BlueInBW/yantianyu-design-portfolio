@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#251d17">
+  <meta name="description" content="闫天御的视觉设计作品集，涵盖系列海报、商品与电商视觉、宣传册与线下活动。点击浏览，让作品与文字逐步呈现。">
+  <meta property="og:title" content="闫天御 · 视觉作品集">
+  <meta property="og:description" content="海报与平面 · 商品与电商 · 线下活动">
+  <meta property="og:type" content="website">
+  <title>闫天御 · 视觉作品集</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/cover.webp" as="image">
+  <link rel="stylesheet" href="style.css">
+  <script src="portfolio-data.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#main">跳到作品内容</a>
+  <header class="site-header">
+    <button class="identity" id="homeButton" aria-label="回到封面"><span class="name">闫天御</span><span class="identity-role">平面与电商视觉设计</span></button>
+    <nav aria-label="主导航">
+      <button class="text-button" id="catalogButton">作品目录<span class="menu-icon" aria-hidden="true"><i></i><i></i></span></button>
+      <button class="text-button contact-button" id="contactButton">联系我</button>
+      <a class="pdf-link" href="assets/yantianyu-portfolio.pdf" target="_blank" rel="noopener">下载 PDF</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="cover" id="cover" aria-label="作品集封面">
+      <div class="cover-visual" aria-hidden="true"></div>
+      <div class="cover-copy">
+        <p class="eyebrow cover-enter">SELECTED WORKS / 2026</p>
+        <h1 class="cover-enter">平面 · 电商<br><span>视觉作品集</span></h1>
+        <p class="cover-categories cover-enter">海报与平面设计<br>商品与电商视觉<br>线下活动视觉</p>
+        <div class="cover-action cover-enter"><button class="primary-button" id="startButton">开始浏览<span class="play-symbol" aria-hidden="true"></span></button><p>点击开始，让作品逐个呈现</p></div>
+      </div>
+      <div class="cover-bottom"><span>闫天御 / VISUAL DESIGN</span><span>点击作品可放大查看</span></div>
+    </section>
+
+    <section class="viewer" id="viewer" hidden aria-label="交互作品展示">
+      <aside class="project-copy">
+        <div class="copy-top">
+          <p class="eyebrow reveal-part" data-step="0" id="category"></p>
+          <div class="reveal-part" data-step="1"><h1 id="projectTitle" tabindex="-1"></h1><p class="project-subtitle" id="projectSubtitle"></p></div>
+          <p class="project-description reveal-part" data-step="2" id="projectDescription"></p>
+          <p class="project-note reveal-part" data-step="2" id="projectNote"></p>
+        </div>
+        <div class="copy-bottom">
+          <span class="reading-label">当前作品</span>
+          <p class="project-counter"><span id="currentNumber">01</span><span class="counter-rule"></span><span id="totalNumber">11</span></p>
+          <button class="underlined-button" id="replayButton">重播本组<span class="replay-icon" aria-hidden="true">↻</span></button>
+        </div>
+      </aside>
+      <div class="art-stage" id="artStage" aria-label="作品图片"></div>
+    </section>
+  </main>
+
+  <footer class="viewer-controls" id="controls" hidden>
+    <div class="navigation-controls"><button class="subtle-button" id="prevButton">上一组</button><div class="reveal-progress" id="revealProgress" aria-label="本组呈现进度"></div><span class="step-status" id="stepStatus"></span></div>
+    <div class="playback-controls"><button class="subtle-button auto-button" id="autoButton" aria-pressed="false"><span class="auto-icon" aria-hidden="true"></span><span id="autoLabel">自动播放</span></button><button class="next-button" id="nextButton">下一件作品</button></div>
+  </footer>
+
+  <dialog class="catalog" id="catalogDialog" aria-labelledby="catalogTitle">
+    <div class="dialog-heading"><div><p class="eyebrow">SELECTED WORKS</p><h2 id="catalogTitle">作品目录</h2></div><button class="close-button" data-close="catalogDialog" aria-label="关闭作品目录">×</button></div>
+    <div class="catalog-content" id="catalogContent"></div>
+    <div class="catalog-footer"><span>选一组作品，进入它的展示过程。</span><button id="catalogContact" class="subtle-button">联系我</button></div>
+  </dialog>
+
+  <dialog class="lightbox" id="lightbox" aria-labelledby="lightboxTitle">
+    <div class="lightbox-toolbar"><span id="lightboxTitle"></span><div><button class="lightbox-mode" id="zoomButton" aria-pressed="false">查看原尺寸</button><button class="close-button" data-close="lightbox" aria-label="关闭放大图片">×</button></div></div>
+    <div class="lightbox-canvas" id="lightboxCanvas"><img id="lightboxImage" alt=""></div>
+    <div class="lightbox-navigation"><button class="subtle-button" id="lightboxPrev">上一张</button><span id="lightboxCount"></span><button class="subtle-button" id="lightboxNext">下一张</button></div>
+  </dialog>
+
+  <dialog class="contact" id="contactDialog" aria-labelledby="contactTitle">
+    <div class="dialog-heading"><div><p class="eyebrow">LET'S TALK</p><h2 id="contactTitle">联系闫天御</h2></div><button class="close-button" data-close="contactDialog" aria-label="关闭联系方式">×</button></div>
+    <p class="contact-intro">平面设计 · 电商视觉 · 线下活动视觉</p>
+    <a class="contact-row" href="tel:15900730029"><span>电话</span><strong>15900730029</strong></a>
+    <a class="contact-row" href="mailto:1198113301@qq.com"><span>邮箱</span><strong>1198113301@qq.com</strong></a>
+    <a class="primary-button contact-pdf" href="assets/yantianyu-portfolio.pdf" target="_blank" rel="noopener">查看 PDF 作品集</a>
+  </dialog>
+  <p class="sr-only" id="announcement" aria-live="polite"></p>
+  <noscript><div class="noscript">此网页需要 JavaScript 才能逐步展示作品。也可以直接<a href="assets/yantianyu-portfolio.pdf">查看 PDF 作品集</a>。</div></noscript>
+</body>
+</html>
