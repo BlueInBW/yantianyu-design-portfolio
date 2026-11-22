@@ -6,7 +6,7 @@
   const cover = $('cover'), viewer = $('viewer'), stage = $('artStage');
   const controls = $('controls'), catalog = $('catalogDialog'), lightbox = $('lightbox');
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const mobile = window.matchMedia('(max-width: 760px)');
+  const mobile = window.matchMedia('(max-width: 960px)');
   let index = -1, revealed = -1, sequenceTimer, autoTimer, autoplay = false, zoomIndex = 0;
   const pad = n => String(n).padStart(2, '0');
   const current = () => projects[index];
