@@ -7,23 +7,25 @@
   const controls = $('controls'), catalog = $('catalogDialog'), lightbox = $('lightbox');
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const mobile = window.matchMedia('(max-width: 960px)');
-  let index = -1, revealed = -1, sequenceTimer, autoTimer, autoplay = false, zoomIndex = 0;
+  let index = -1, revealed = -1, sequenceTimer, autoTimer, autoplay = false, zoomIndex = 0, zoomProjectIndex = 0;
   const pad = n => String(n).padStart(2, '0');
   const current = () => projects[index];
-  const maxStep = () => 2 + current().images.length;
+  const entries = () => current().pieces || current().images;
+  const maxStep = () => 2 + entries().length;
   function clearTimers() { clearTimeout(sequenceTimer); clearTimeout(autoTimer); }
   function announce(message) { $('announcement').textContent = message; }
   function updateAutoButton() {
     $('autoButton').setAttribute('aria-pressed', String(autoplay));
+    $('autoButton').setAttribute('aria-label',autoplay?'暂停播放':'自动播放');
     $('autoLabel').textContent = autoplay ? '暂停播放' : '自动播放';
   }
   function stopAuto() { autoplay = false; clearTimeout(autoTimer); updateAutoButton(); }
   function updateProgress() {
-    const count = Math.max(0, revealed - 2), total = current().images.length;
+    const count = Math.max(0, revealed - 2), total = entries().length;
     [...$('revealProgress').children].forEach((dot, i) => dot.classList.toggle('complete', i < count));
     $('stepStatus').textContent = `${count} / ${total}`;
     $('revealProgress').setAttribute('aria-label', `已呈现 ${count} 件，共 ${total} 件作品`);
-    $('nextButton').textContent = revealed < maxStep() ? '下一件作品' : index === projects.length - 1 ? '回到封面' : '下一组作品';
+    $('nextButton').textContent = revealed < maxStep() ? '继续呈现' : index === projects.length - 1 ? '回到封面' : '下一页';
     $('prevButton').disabled = index === 0;
   }
   function scheduleAuto() {
@@ -42,7 +44,8 @@
       if (el.matches('.artwork')) el.inert = !shown;
     });
     updateProgress();
-    if (scroll && mobile.matches && revealed >= 3) {
+    window.OriginalScene?.complete(revealed===maxStep());
+    if (scroll && mobile.matches && revealed >= 3 && !data.interactiveOriginal) {
       const target = stage.children[revealed - 3];
       if (target) stage.scrollTo({ left: target.offsetLeft - (stage.clientWidth - target.clientWidth) / 2, behavior: reducedMotion.matches ? 'instant' : 'smooth' });
     }
@@ -51,14 +54,15 @@
   function runSequence() {
     clearTimers();
     const stopAt = mobile.matches && !autoplay ? Math.min(maxStep(), 3) : maxStep();
-    if (reducedMotion.matches) { revealTo(stopAt); return; }
+    if (reducedMotion.matches) { revealTo(maxStep()); return; }
     function tick() {
       revealTo(revealed + 1, mobile.matches && autoplay);
-      if (revealed < stopAt) sequenceTimer = setTimeout(tick, revealed < 2 ? 180 : mobile.matches && autoplay ? 2400 : 520);
+      if (revealed < stopAt) sequenceTimer = setTimeout(tick, revealed < 2 ? 180 : mobile.matches && autoplay ? 1100 : 600);
     }
     sequenceTimer = setTimeout(tick, 70);
   }
   function makeArtwork(image, i) {
+    if(data.interactiveOriginal)return window.OriginalScene.create(current(),()=>openLightbox(0));
     const figure = document.createElement('figure');
     figure.className = 'artwork reveal-part'; figure.dataset.step = String(i + 3); figure.inert = true;
     const button = document.createElement('button'); button.className = 'art-open'; button.setAttribute('aria-label', `放大查看：${image.label}`);
@@ -78,6 +82,8 @@
     clearTimers(); index = nextIndex; revealed = -1;
     cover.hidden = true; viewer.hidden = false; controls.hidden = false; document.body.classList.add('viewing');
     const project = current();
+    window.OriginalScene?.setTheme(project);
+    window.OriginalScene?.clear();
     $('category').textContent = project.category;
     $('projectTitle').textContent = project.name;
     if (project.id === 'hifinance') $('projectTitle').replaceChildren(document.createTextNode('HiFinance'), document.createElement('br'), document.createTextNode('会员活动'));
@@ -88,7 +94,8 @@
     $('currentNumber').textContent = pad(index + 1); $('totalNumber').textContent = pad(projects.length);
     stage.className = `art-stage layout-${project.layout}`;
     stage.replaceChildren(...project.images.map(makeArtwork)); stage.scrollLeft = 0;
-    $('revealProgress').replaceChildren(...project.images.map(() => document.createElement('span')));
+    window.OriginalScene?.resize();
+    $('revealProgress').replaceChildren(...entries().map(() => document.createElement('span')));
     viewer.querySelectorAll('.reveal-part').forEach(el => el.classList.remove('is-visible'));
     document.querySelectorAll('.catalog-item').forEach((item, i) => { item.classList.toggle('active', i === index); item.setAttribute('aria-current', i === index ? 'true' : 'false'); });
     document.title = `${project.name} · 闫天御作品集`;
@@ -101,6 +108,8 @@
   }
   function showHome(options = {}) {
     clearTimers(); stopAuto(); index = -1;
+    window.OriginalScene?.setTheme();
+    window.OriginalScene?.clear();
     cover.hidden = false; viewer.hidden = true; controls.hidden = true; document.body.classList.remove('viewing');
     document.title = '闫天御 · 视觉作品集';
     if (options.hash !== false) writeHash('home', options.replace);
@@ -111,12 +120,13 @@
     clearTimers();
     if (revealed < maxStep()) {
       const next = Math.max(3, revealed + 1); revealTo(next, true);
-      announce(current().images[next - 3].label);
+      announce(entries()[next - 3].label);
     } else if (index === projects.length - 1) { showHome(); $('startButton').focus(); }
     else showProject(index + 1, { focus: true });
   }
   function replay() {
     clearTimers(); revealed = -1;
+    window.OriginalScene?.complete(false);
     viewer.querySelectorAll('.reveal-part').forEach(el => { el.classList.remove('is-visible'); if (el.matches('.artwork')) el.inert = true; });
     stage.scrollTo({ left: 0, behavior: 'instant' }); updateProgress(); runSequence();
   }
@@ -129,7 +139,7 @@
         if (project.category !== category) return;
         const button = document.createElement('button'); button.className = 'catalog-item'; button.dataset.index = String(i);
         const thumb = document.createElement('span'); thumb.className = 'catalog-thumbnail';
-        const img = document.createElement('img'); img.src = project.images[0].src; img.alt = ''; img.loading = 'lazy'; img.width = project.images[0].width; img.height = project.images[0].height; thumb.append(img);
+        const img = document.createElement('img'); img.src = project.images[0].thumbnail || project.images[0].src; img.alt = ''; img.loading = 'lazy'; img.width = project.images[0].width; img.height = project.images[0].height; thumb.append(img);
         const name = document.createElement('span'); name.className = 'catalog-name'; name.textContent = project.name;
         const subtitle = document.createElement('span'); subtitle.className = 'catalog-subtitle'; subtitle.textContent = project.subtitle;
         button.append(thumb, name, subtitle);
@@ -142,13 +152,17 @@
   function showModal(dialog) { clearTimeout(autoTimer); dialog.showModal(); }
   function resetZoom() { $('lightboxCanvas').classList.remove('is-actual'); $('zoomButton').setAttribute('aria-pressed', 'false'); $('zoomButton').textContent = '查看原尺寸'; }
   function setLightboxImage(i) {
-    const images = current().images; zoomIndex = (i + images.length) % images.length;
-    const image = images[zoomIndex]; resetZoom();
-    $('lightboxImage').src = image.src; $('lightboxImage').alt = `${current().name} · ${image.label}`;
-    $('lightboxTitle').textContent = image.label; $('lightboxCount').textContent = `${zoomIndex + 1} / ${images.length}`;
+    const original = !!data.sourcePages;
+    const total = original ? projects.length : current().images.length;
+    zoomIndex = (i + total) % total;
+    zoomProjectIndex = original ? zoomIndex : index;
+    const project = projects[zoomProjectIndex];
+    const image = project.images[original ? 0 : zoomIndex]; resetZoom();
+    $('lightboxImage').src = image.full || image.src; $('lightboxImage').alt = `${project.name} · ${image.label}`;
+    $('lightboxTitle').textContent = image.label; $('lightboxCount').textContent = `${zoomIndex + 1} / ${total}`;
     $('lightboxCanvas').scrollTo(0, 0);
   }
-  function openLightbox(i) { setLightboxImage(i); showModal(lightbox); }
+  function openLightbox(i) { setLightboxImage(data.sourcePages ? index : i); showModal(lightbox); }
   function route() {
     const target = location.hash.slice(1);
     const found = projects.findIndex(p => p.id === target);
@@ -159,6 +173,7 @@
   $('nextButton').addEventListener('click', advance);
   $('prevButton').addEventListener('click', () => { if (index > 0) showProject(index - 1, { focus: true }); });
   $('replayButton').addEventListener('click', replay);
+  $('showAllButton').addEventListener('click',()=>{clearTimers();revealTo(maxStep());announce('本页作品已完整显示。');});
   $('catalogButton').addEventListener('click', () => showModal(catalog));
   $('contactButton').addEventListener('click', () => showModal($('contactDialog')));
   $('catalogContact').addEventListener('click', () => { catalog.close(); showModal($('contactDialog')); });
@@ -174,7 +189,13 @@
   $('lightboxNext').addEventListener('click', () => setLightboxImage(zoomIndex + 1));
   document.querySelectorAll('[data-close]').forEach(button => button.addEventListener('click', () => $(button.dataset.close).close()));
   document.querySelectorAll('dialog').forEach(dialog => {
-    dialog.addEventListener('close', scheduleAuto);
+    dialog.addEventListener('close', () => {
+      if (dialog === lightbox && data.sourcePages) {
+        if (zoomProjectIndex !== index) showProject(zoomProjectIndex, { replace: true });
+        $('lightboxImage').removeAttribute('src');
+      }
+      scheduleAuto();
+    });
     dialog.addEventListener('click', event => { if (event.target === dialog) { const r = dialog.getBoundingClientRect(); if (event.clientX < r.left || event.clientX > r.right || event.clientY < r.top || event.clientY > r.bottom) dialog.close(); } });
   });
   document.addEventListener('keydown', event => {
@@ -193,5 +214,5 @@
   window.addEventListener('hashchange', route);
   reducedMotion.addEventListener('change', () => { if (index >= 0 && reducedMotion.matches) { clearTimers(); revealTo(maxStep()); } });
   makeCatalog(); route();
-  [projects[0].images[0], projects[0].images[1]].forEach(image => { const preload = new Image(); preload.src = image.src; });
+  projects.slice(0, 2).map(project => project.images[0]).filter(Boolean).forEach(image => { const preload = new Image(); preload.src = image.src; });
 })();
