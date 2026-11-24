@@ -1,6 +1,7 @@
 (() => {
   'use strict';
-  const data = window.PORTFOLIO;
+  const selection = window.PORTFOLIO_SELECTIONS?.[new URLSearchParams(location.search).get('view')];
+  const data = selection ? { ...window.PORTFOLIO, projects: selection.projects, categories: selection.categories, sourcePages: null, interactiveOriginal: false } : window.PORTFOLIO;
   const projects = data.projects;
   const $ = id => document.getElementById(id);
   const cover = $('cover'), viewer = $('viewer'), stage = $('artStage');
@@ -10,6 +11,16 @@
   let index = -1, revealed = -1, sequenceTimer, autoTimer, autoplay = false, zoomIndex = 0, zoomProjectIndex = 0;
   const pad = n => String(n).padStart(2, '0');
   const current = () => projects[index];
+  if (selection) {
+    document.body.classList.add('selection-view');
+    document.querySelector('.cover h1').replaceChildren(document.createTextNode(selection.title), document.createElement('br'), Object.assign(document.createElement('span'),{textContent:'作品精选'}));
+    document.querySelector('.cover-categories').textContent=selection.subtitle;
+    document.querySelector('.cover-action p').textContent=selection.description;
+    document.querySelector('.cover-bottom span').textContent=`SELECTED WORKS / ${selection.label}`;
+    document.querySelector('.cover-visual').style.backgroundImage=`url('${selection.hero}')`;
+    $('completePortfolio').hidden=false;
+    $('totalNumber').textContent=pad(projects.length);
+  }
   const entries = () => current().pieces || current().images;
   const maxStep = () => 2 + entries().length;
   function clearTimers() { clearTimeout(sequenceTimer); clearTimeout(autoTimer); }
@@ -111,7 +122,7 @@
     window.OriginalScene?.setTheme();
     window.OriginalScene?.clear();
     cover.hidden = false; viewer.hidden = true; controls.hidden = true; document.body.classList.remove('viewing');
-    document.title = '闫天御 · 视觉作品集';
+    document.title = selection ? `${selection.label} · 闫天御作品精选` : '闫天御 · 视觉作品集';
     if (options.hash !== false) writeHash('home', options.replace);
     window.scrollTo({ top: 0, behavior: 'instant' });
   }

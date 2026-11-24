@@ -1,0 +1,17 @@
+.selection-view .cover-visual{aspect-ratio:4/3;background-color:#1b1c1b;background-size:contain;box-shadow:none;border:0}
+.selection-view .cover-action p{max-width:29em;line-height:1.85}
+.selection-view .art-stage{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;align-items:stretch}
+.selection-view .layout-duo{grid-template-columns:repeat(2,minmax(0,1fr))}
+.selection-view .layout-solo{grid-template-columns:minmax(0,1fr)}
+.selection-view .artwork{width:100%;min-width:0;min-height:0}
+.selection-view .art-open img{border:0;box-shadow:none}
+.selection-view .layout-brochure{grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch}
+.selection-view .artwork figcaption{text-align:left;font-size:14px;line-height:1.65}
+.selection-view .catalog-section:has(.catalog-grid:empty){display:none}
+@media(max-width:960px){
+ .selection-view .site-header{gap:14px}.selection-view .site-header nav{gap:16px}.selection-view .contact-button,.selection-view .site-header .pdf-link{display:none}
+ .selection-view .cover-visual{aspect-ratio:4/3;min-height:220px}
+ .selection-view .art-stage,.selection-view .layout-duo,.selection-view .layout-brochure{display:flex;align-items:stretch;justify-content:flex-start;height:56svh;min-height:330px;overflow-x:auto;overflow-y:hidden;gap:20px;padding:0 24px 18px;scroll-snap-type:x mandatory;scroll-padding-inline:24px;overscroll-behavior-x:contain}
+ .selection-view .art-stage .artwork{flex:0 0 calc(100vw - 52px);height:100%;scroll-snap-align:center}
+ .selection-view .art-open img{max-height:100%;max-width:100%}
+}

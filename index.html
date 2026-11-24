@@ -13,9 +13,11 @@
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="preload" href="assets/original/page-01.webp" as="image">
   <link rel="stylesheet" href="original.css?v=original-20261123">
+  <link rel="stylesheet" href="selections.css?v=20261124">
   <script src="portfolio-data.js?v=original-20261123" defer></script>
+  <script src="portfolio-selections.js?v=20261124" defer></script>
   <script src="original-scenes.js?v=original-20261123" defer></script>
-  <script src="app.js?v=original-20261123" defer></script>
+  <script src="app.js?v=selected-20261124" defer></script>
 </head>
 <body>
   <a class="skip" href="#main">跳到作品内容</a>
@@ -24,6 +26,7 @@
     <nav aria-label="主导航">
       <button class="text-button" id="catalogButton">作品目录<span class="menu-icon" aria-hidden="true"><i></i><i></i></span></button>
       <button class="text-button contact-button" id="contactButton">联系我</button>
+      <a class="text-button" id="completePortfolio" href="./#home" hidden>完整作品集</a>
       <a class="pdf-link" href="assets/original-portfolio.pdf" target="_blank" rel="noopener">原版 PDF</a>
     </nav>
   </header>
