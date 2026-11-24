@@ -1,6 +1,7 @@
 (() => {
   'use strict';
-  const selection = window.PORTFOLIO_SELECTIONS?.[new URLSearchParams(location.search).get('view')];
+  const requestedView = new URLSearchParams(location.search).get('view');
+  const selection = Object.hasOwn(window.PORTFOLIO_SELECTIONS || {}, requestedView) ? window.PORTFOLIO_SELECTIONS[requestedView] : null;
   const data = selection ? { ...window.PORTFOLIO, projects: selection.projects, categories: selection.categories, sourcePages: null, interactiveOriginal: false } : window.PORTFOLIO;
   const projects = data.projects;
   const $ = id => document.getElementById(id);
